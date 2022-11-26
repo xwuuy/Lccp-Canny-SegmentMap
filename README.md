@@ -1,5 +1,6 @@
-# lccpAndCanny
+# lccp&CannyRefineMask
 基于lccp与边缘检测的三维点云分割方法
+改善二维实例分割生成的Mask
 实验效果图
 
 ![Project1_H7Nbtfc6Hz](https://user-images.githubusercontent.com/51278459/204071737-8b958ad0-0131-41c2-8f56-5fdee388903b.png)
