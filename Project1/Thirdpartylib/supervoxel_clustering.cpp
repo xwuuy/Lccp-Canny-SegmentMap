@@ -35,6 +35,7 @@ namespace pcl
       data_.xyz_[0] += new_point.x;
       data_.xyz_[1] += new_point.y;
       data_.xyz_[2] += new_point.z;
+	  data_.a |= new_point.a;
       //Separate sums for r,g,b since we can't sum in uchars
       data_.rgb_[0] += static_cast<float> (new_point.r); 
       data_.rgb_[1] += static_cast<float> (new_point.g); 
@@ -64,6 +65,7 @@ namespace pcl
       data_.xyz_[0] /= (static_cast<float> (num_points_));
       data_.xyz_[1] /= (static_cast<float> (num_points_));
       data_.xyz_[2] /= (static_cast<float> (num_points_));
+	  data_.pointnum = num_points_;
     }
     
     //Explicit overloads for XYZ types
@@ -111,6 +113,7 @@ namespace ORBSLAM2
     point_arg.rgba = static_cast<uint32_t>(rgb_[0]) << 16 | 
     static_cast<uint32_t>(rgb_[1]) << 8 | 
     static_cast<uint32_t>(rgb_[2]);  
+	point_arg.a = a;
     point_arg.x = xyz_[0];
     point_arg.y = xyz_[1];
     point_arg.z = xyz_[2];

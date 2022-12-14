@@ -149,9 +149,9 @@ public:
 				
 				if (edge.ptr<uchar>(m)[n] > 0) {
 					p.a = 1;
-					p1.b =255;
+					/*p1.b =255;
 					p1.g = 255;
-					p1.r = 255;
+					p1.r = 255;*/
 				}
 				else {
 					p.a = 0;
@@ -200,6 +200,92 @@ public:
 			info->Rectrgb = rgb(info->ojbROI).clone();
 			info->Rectdepth = depth(info->ojbROI).clone();
 			info->objedge= info->objMat.mul(edgeimg(info->ojbROI));
+
+			/*cv::Mat edgergb;
+			cvtColor(info->objedge, edgergb, cv::COLOR_GRAY2BGR, 3);
+			cv::imshow("edge", edgergb);
+			int gridheight = edgergb.size().height;
+			int gridwidth = edgergb.size().width;
+			for (size_t y = 0; y < gridheight; y++)
+			{
+				bool one = true;
+				bool two = true;
+				for (size_t x = 0, bx = gridwidth - 1; x < gridwidth && bx >= 0 && (one || two); )
+				{
+					if (one) {
+						uchar gray = edgergb.ptr<uchar>(y)[3*x];
+						if (gray>0) {
+							edgergb.ptr<uchar>(y)[3*x+2] = 198;
+							edgergb.ptr<uchar>(y)[3 * x + 1] = 23;
+							edgergb.ptr<uchar>(y)[3 * x ] = 19;
+							one = false;
+						}
+						if (x > gridwidth / 2) {
+							one = false;
+						}
+						else {
+							x++;
+						}
+					}
+					if (two) {
+						uchar gray = edgergb.ptr<uchar>(y)[3*bx];
+						if (gray>0) {
+							edgergb.ptr<uchar>(y)[3 * bx + 2] = 198;
+							edgergb.ptr<uchar>(y)[3 * bx + 1] = 23;
+							edgergb.ptr<uchar>(y)[3 * bx] = 19;
+							two = false;
+						}
+						if (bx < gridwidth / 2) {
+							two = false;
+						}
+						else {
+							bx--;
+						}
+					}
+				}
+			}
+
+			for (size_t x = 0; x < gridwidth; x++)
+			{
+				bool one = true;
+				bool two = true;
+				for (size_t y = 0, by = gridheight - 1; y < gridheight && by >= 0 && (one || two);)
+				{
+					if (one) {
+						uchar gray = edgergb.ptr<uchar>(y)[3*x];
+						if (gray>0) {
+							edgergb.ptr<uchar>(y)[3 * x + 2] = 198;
+							edgergb.ptr<uchar>(y)[3 * x + 1] = 23;
+							edgergb.ptr<uchar>(y)[3 * x] = 19;
+							one = false;
+						}
+						if (y > gridheight / 2) {
+							one = false;
+						}
+						else {
+							y++;
+						}
+					}
+					if (two) {
+						uchar gray = edgergb.ptr<uchar>(by)[3*x];
+						if (gray>0) {
+							edgergb.ptr<uchar>(by)[3 * x + 2] = 198;
+							edgergb.ptr<uchar>(by)[3 * x + 1] = 23;
+							edgergb.ptr<uchar>(by)[3 * x] = 19;
+							two = false;
+						}
+						if (by < gridheight / 2) {
+							two = false;
+						}
+						else {
+							by--;
+						}
+					}
+				}
+			}
+			cv::imshow("margin", edgergb);
+			while (cv::waitKey(0) != 'd')
+				;*/
 			info->objrgbaCloud = generatePointCloud(info->objedge, info->Rectrgb, info->Rectdepth,info->objMat,info->ojbROI,info->objrgbaEdgeCloud, info->objMaskrgbaCloud);
 			maskheight += (info->ojbROI.height + 1);
 			/*cv::imshow("objedge", info->objedge);
@@ -222,6 +308,7 @@ public:
 		object_mask = cv::imread(str1, cv::IMREAD_UNCHANGED);
 		str1 = "C:/Users/16694/source/repos/Project1/rgbd_dataset_freiburg1_room/rgb/" + path + ".png";
 		rgb = cv::imread(str1, cv::IMREAD_UNCHANGED);
+		cv::imshow("rgb", rgb);
 		cv::Mat cn, gray;
 		cv::cvtColor(rgb, gray, cv::COLOR_BGR2GRAY);
 		cv::Canny(gray, cn, 50, 180);
@@ -229,10 +316,12 @@ public:
 		cv::dilate(cn, cn, element);
 		str1 = "C:/Users/16694/source/repos/Project1/rgbd_dataset_freiburg1_room/depth/" + depthpath + ".png";
 		depth = cv::imread(str1, cv::IMREAD_UNCHANGED);
+		cv::imshow("depth", depth);
 		std::cout<<"depth type="<<depth.type();
 		depth.convertTo(depth, CV_32F);
 		depth /= 5000;
 		str1 = "C:/Users/16694/source/repos/Project1/rgbd_dataset_freiburg1_room/yaml/" + path + ".yml";
+		cv::imshow("canny", cn);
 	/*	cv::imshow("object_mask",object_mask);
 		cv::imshow("rgb",rgb);
 		cv::imshow("canny", cn);

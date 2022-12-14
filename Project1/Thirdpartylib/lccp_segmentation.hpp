@@ -471,12 +471,9 @@ pcl::LCCPSegmentation<PointT>::connIsConvex (const uint32_t source_label_arg,
                                              const uint32_t target_label_arg,
                                              float &normal_angle)
 {
-	bool sv_labelMargin = marginvoxel_set_.find(source_label_arg) != marginvoxel_set_.end();
-	bool neighbor_labelMargin = marginvoxel_set_.find(target_label_arg) != marginvoxel_set_.end();
 	///*分三种情况，第一种两顶点皆为边缘体素，第二种两顶点有一个为边缘体素，第三种为两顶点皆不为边缘体素
 	//	第一种创建边，第二种和第三种不创建边*/
-	if ((sv_labelMargin || neighbor_labelMargin)) {
-		normal_angle == 0;
+	if ((marginvoxel_set_.find(source_label_arg) != marginvoxel_set_.end()) || (marginvoxel_set_.find(target_label_arg) != marginvoxel_set_.end())) {
 		return false;
 	}
 

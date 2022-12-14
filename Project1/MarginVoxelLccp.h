@@ -10,8 +10,9 @@ typedef pcl::PointCloud<PointT> PointCloudT;
 namespace ORBSLAM2 {
 class MarginVoxelLccp {
 	public:
-		MarginVoxelLccp(float voxel_resolution, float seed_resolution, PointCloudT::Ptr edgeCloud, cv::Mat mask, cv::Rect ROI, float maskProportion = 0.75, float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
+		MarginVoxelLccp(float voxel_resolution, float seed_resolution, PointCloudT::Ptr edgeCloud, cv::Mat mask, cv::Rect ROI, float maskProportion = 0.7, float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
 		void setSuperVoxel(float color_importance, float spatial_importance, float normal_importance);
+		void setSuperVoxelAdaptive(float color_importance, float spatial_importance, float normal_importance);
 		void createLccp(float concavity_tolerance_threshold = 8, float smoothness_threshold = 0.01, std::uint32_t min_segment_size = 0, bool use_extended_convexity = false, bool use_sanity_criterion = false, unsigned int k_factor = 0);
 		template<class Point>
 		bool isInMask(Point p) {
@@ -26,11 +27,19 @@ class MarginVoxelLccp {
 			lccp.relabelCloud(*lccp_labeled_cloud);
 			return lccp_labeled_cloud;
 		}
+
 		uint BFS(const uint32_t &seed, const boost::unordered_map<uint32_t, std::pair<int, PointCloudT::Ptr>>& matchPointCloud, std::unordered_set<uint32_t> &connectedvertexes, const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_, const std::map<uint32_t, std::set<uint32_t> > &seg_label_to_sv_list_map_,   std::unordered_set<uint32_t> &childgraph);
 		std::unordered_set<uint32_t> getMaxConnectedgraph
 		(const boost::unordered_map<uint32_t, std::pair<int, PointCloudT::Ptr>> &matchPointCloud, const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_, const std::map<uint32_t, std::set<uint32_t> > &seg_label_to_sv_list_map_, const uint32_t &seed, float matchedvoxelnum);
 		PointCloudT::Ptr segmentObjPoinCloud();
+		PointCloudT::Ptr segmentObjVoxelCloud();
 		PointCloudT::Ptr edgeCloud;
+		pcl::PointCloud<pcl::PointXYZL>::Ptr relabelCloud() {
+			pcl::PointCloud<pcl::PointXYZL>::Ptr sv_labeled_cloud = super.getLabeledCloud();
+			pcl::PointCloud<pcl::PointXYZL>::Ptr lccp_labeled_cloud = sv_labeled_cloud->makeShared();
+			lccp.relabelCloud(*lccp_labeled_cloud);
+			return lccp_labeled_cloud; 
+		}
 		cv::Mat mask;
 		cv::Rect ROI;
 		float fx;

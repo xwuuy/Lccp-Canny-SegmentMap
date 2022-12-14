@@ -1,7 +1,7 @@
 #ifndef ORBSLAM2_SEGMENTATION_SUPERVOXEL_CLUSTERING_HPP_
 #define ORBSLAM2_SEGMENTATION_SUPERVOXEL_CLUSTERING_HPP_
 #include"supervoxel_clustering.h"
-#include<unordered_set>
+
 #include<opencv2/opencv.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -584,6 +584,148 @@ ORBSLAM2::SupervoxelClustering<PointT>::getLabeledCloud () const
   return (labeled_cloud);
 }
 
+template<typename PointT>
+ pcl::PointCloud<pcl::PointXYZL>::Ptr ORBSLAM2::SupervoxelClustering<PointT>::getFullLabeledWithMarginCloud(const boost::unordered_set<uint32_t> &MarginVoxellabel)
+{
+	pcl::PointCloud<pcl::PointXYZL>::Ptr labeled_cloud(new pcl::PointCloud<pcl::PointXYZL>);
+	pcl::copyPointCloud(*input_, *labeled_cloud);
+
+	pcl::PointCloud <pcl::PointXYZL>::iterator i_labeled;
+	typename pcl::PointCloud <PointT>::const_iterator i_input = input_->begin();
+	std::vector <int> indices;
+	std::vector <float> sqr_distances;
+	for (i_labeled = labeled_cloud->begin(); i_labeled != labeled_cloud->end(); ++i_labeled, ++i_input)
+	{
+		if (!pcl::isFinite<PointT>(*i_input))
+			i_labeled->label = 0;
+		else
+		{
+			i_labeled->label = 0;
+			LeafContainerT *leaf = adjacency_octree_->getLeafContainerAtPoint(*i_input);
+			VoxelData& voxel_data = leaf->getData();
+			if (voxel_data.owner_)
+			{
+				if (MarginVoxellabel.find(voxel_data.owner_->getLabel()) != MarginVoxellabel.end())
+					i_labeled->label = 100;
+				else
+					i_labeled->label = voxel_data.owner_->getLabel();
+			}
+
+		}
+
+	}
+
+	return (labeled_cloud);
+}
+
+boost::unordered_set<uint32_t> ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>::setMarginVoxelAdaptive(cv::Rect rect, float fx, float fy, float cx, float cy)
+ {
+	 double gridresolution = std::round(fx*resolution_);//根据体素分辨率自动计算栅格分辨率
+	 boost::unordered_set<uint32_t>  marginvoxel_set_;
+	 boost::unordered_set<uint32_t>  edgevoxel_set_;
+	 int gridwidth = std::ceil(rect.width / gridresolution);
+	 int gridheight = std::ceil(rect.height / gridresolution);
+	 std::vector<std::vector<gridData>> grid(gridheight, std::vector<gridData>(gridwidth));
+	 for (typename HelperListT::const_iterator sv_itr = supervoxel_helpers_.cbegin(); sv_itr != supervoxel_helpers_.cend(); ++sv_itr)
+	 {
+		 typename SupervoxelHelper::const_iterator leaf_itr;
+		 for (leaf_itr = sv_itr->leaves_.begin(); leaf_itr != sv_itr->leaves_.end(); ++leaf_itr )
+		 {
+			 const VoxelData& leaf_data = (*leaf_itr)->getData();
+			 pcl::PointXYZRGBA p;
+			 leaf_data.getPoint(p);
+			 float gridx = (p.x*fx / p.z + cx - rect.x) / gridresolution;
+			 float gridy = (p.y*fy / p.z + cy - rect.y) / gridresolution;
+			 grid[gridy][gridx].updateGrid(leaf_data.owner_);
+			 if (p.a > 0)
+			 {
+				 edgevoxel_set_.insert(leaf_data.owner_->getLabel());
+			 }
+		 }
+	 }
+	 /*cv::Mat gridimg(gridheight, gridwidth, CV_8UC1 , cv::Scalar(0, 0, 0));
+	 for (size_t i = 0; i < grid.size(); i++)
+	 {
+		 for (size_t ii = 0; ii < grid[i].size(); ii++)
+		 {
+			 auto hh=grid[i][ii].getMaxSupervoxelHelper();
+			 if(hh&&edgevoxel_set_.find(hh->getLabel())!= edgevoxel_set_.end())
+				 gridimg.ptr<uchar>(i)[ii] = 255;
+		 }
+	 }
+	 cv::resize(gridimg, gridimg,rect.size(),0,0,cv::INTER_NEAREST);
+	 cv::imshow("gridimg", gridimg);*/
+	 for (size_t y = 0; y < gridheight; y++)
+	 {
+		 bool left = true;
+		 bool right = true;
+		 for (size_t x = 0, bx = gridwidth - 1; x < gridwidth && bx >= 0 && (left || right); )
+		 {
+			 if (left) {//最左
+				 SupervoxelHelper* temphelp = grid[y][x].getMaxEdgeSupervoxelHelper(edgevoxel_set_);
+				 if (temphelp) {
+					 marginvoxel_set_.insert(temphelp->getLabel());
+					 left = false;
+				 }
+				 if (x > gridwidth / 2) {
+					 left = false;
+				 }
+				 else {
+					 x++;
+				 }
+			 }
+			 if (right) {//最右
+				 SupervoxelHelper* temphelp = grid[y][bx].getMaxEdgeSupervoxelHelper(edgevoxel_set_);
+				 if (temphelp) {
+					 marginvoxel_set_.insert(temphelp->getLabel());
+					 right = false;
+				 }
+				 if (bx < gridwidth / 2) {
+					 right = false;
+				 }
+				 else {
+					 bx--;
+				 }
+			 }
+		 }
+	 }
+
+	 for (size_t x = 0; x < gridwidth; x++)
+	 {
+		 bool top = true;
+		 bool bottom = true;
+		 for (size_t y = 0, by = gridheight - 1; y < gridheight && by >= 0 && (top || bottom);)
+		 {
+			 if (top) {//最上
+				 SupervoxelHelper* temphelp = grid[y][x].getMaxEdgeSupervoxelHelper(edgevoxel_set_);
+				 if (temphelp) {
+					 marginvoxel_set_.insert(temphelp->getLabel());
+					 top = false;
+				 }
+				 if (y > gridheight / 2) {
+					 top = false;
+				 }
+				 else {
+					 y++;
+				 }
+			 }
+			 if (bottom) {//最下
+				 SupervoxelHelper* temphelp = grid[by][x].getMaxEdgeSupervoxelHelper(edgevoxel_set_);
+				 if (temphelp) {
+					 marginvoxel_set_.insert(temphelp->getLabel());
+					 bottom = false;
+				 }
+				 if (by < gridheight / 2) {
+					 bottom = false;
+				 }
+				 else {
+					 by--;
+				 }
+			 }
+		 }
+	 }
+	 return marginvoxel_set_;
+ }
 
 
 boost::unordered_set<uint32_t> ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>::setMarginVoxel(cv::Rect rect,double gridresolution, float fx, float fy , float cx , float cy )
@@ -601,8 +743,8 @@ boost::unordered_set<uint32_t> ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>
 			VoxelData& voxel_data = leaf->getData();
 			if (voxel_data.owner_)
 			{
-				int gridx = (inputBegin->x*fx / inputBegin->z + cx - rect.x) / gridresolution;
-				int gridy = (inputBegin->y*fy / inputBegin->z + cy - rect.y) / gridresolution;
+				float gridx = (inputBegin->x*fx / inputBegin->z + cx - rect.x) / gridresolution;
+				float gridy = (inputBegin->y*fy / inputBegin->z + cy - rect.y) / gridresolution;
 				//if (gridx < 0 || gridy < 0)
 				//	continue;
 
@@ -614,7 +756,19 @@ boost::unordered_set<uint32_t> ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>
 			}
 		}
 	} 
-	
+	//return edgevoxel_set_;
+	/*cv::Mat gridimg(gridheight, gridwidth, CV_8UC1, cv::Scalar(0, 0, 0));
+	for (size_t i = 0; i < grid.size(); i++)
+	{
+		for (size_t ii = 0; ii < grid[i].size(); ii++)
+		{
+			auto hh = grid[i][ii].getMaxSupervoxelHelper();
+			if (hh&&edgevoxel_set_.find(hh->getLabel()) != edgevoxel_set_.end())
+				gridimg.ptr<uchar>(i)[ii] = 255;
+		}
+	}
+	cv::resize(gridimg, gridimg, rect.size(), 0, 0, cv::INTER_NEAREST);
+	cv::imshow("gridimg1", gridimg);*/
 	for (size_t y = 0; y < gridheight; y++)
 	{
 		bool one = true;
@@ -684,6 +838,7 @@ boost::unordered_set<uint32_t> ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>
 			}
 		}
 	}
+
 	return marginvoxel_set_;
 }
 

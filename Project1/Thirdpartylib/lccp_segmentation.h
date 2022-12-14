@@ -110,7 +110,7 @@ namespace pcl
                            const std::multimap<uint32_t, uint32_t> &label_adjacency_arg, boost::unordered_set<uint32_t>  marginvoxel_set_)
       {
         // Initialization
-		  this->marginvoxel_set_ = marginvoxel_set_;
+		 this->marginvoxel_set_ = marginvoxel_set_;
         prepareSegmentation (supervoxel_clusters_arg, label_adjacency_arg);  // after this, sv_adjacency_list_ can be used to access adjacency list
         supervoxels_set_ = true;
       }

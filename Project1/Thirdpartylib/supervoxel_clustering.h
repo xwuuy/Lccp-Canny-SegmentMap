@@ -12,7 +12,7 @@
 #include <pcl/search/search.h>
 #include <pcl/segmentation/boost.h>
 #include <opencv2/core/core.hpp>  
-
+#include<unordered_set>
 
 //DEBUG TODO REMOVE
 #include <pcl/common/time.h>
@@ -100,7 +100,9 @@ namespace ORBSLAM2
             rgb_ (0.0f, 0.0f, 0.0f),
             normal_ (0.0f, 0.0f, 0.0f, 0.0f),
             curvature_ (0.0f),
-            owner_ (0)
+			pointnum(0),
+            owner_ (0),
+			a(0)
             {}
 
           /** \brief Gets the data of in the form of a point
@@ -121,24 +123,43 @@ namespace ORBSLAM2
           float curvature_;
           float distance_;
           int idx_;
+		  int pointnum;
+		  uchar a;
           SupervoxelHelper* owner_;
 
         public:
           EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       };
 
-	  class gridData {
+	  class gridData {//像素坐标系下的栅格
 	  public:
-		  gridData():MaxVoxel_({nullptr,0}) {}
+		  gridData():MaxVoxel_({nullptr,0 }), MaxEdgeVoxel_({ nullptr,0 }) {
+			  
+		  }
 		  void updateGrid(SupervoxelHelper* help) {
-			  auto res = VoxelNum_.insert(std::make_pair( help,1));
+			  auto res = VoxelNum_.insert(std::make_pair(help, 1 ));
 			  if (!res.second) {
 				  ++res.first->second;
 			  }
-			  MaxVoxel_ = res.first->second > MaxVoxel_.second ? *res.first : MaxVoxel_;
+			  MaxVoxel_ = res.first->second > MaxVoxel_.second? *res.first : MaxVoxel_;
 		  }
+		 
 		  SupervoxelHelper* getMaxSupervoxelHelper() {
 			  return MaxVoxel_.first;
+		  }
+		  SupervoxelHelper* getMaxEdgeSupervoxelHelper(const boost::unordered_set<uint32_t>  &edgevoxel_set_) {
+			  if (!MaxEdgeVoxel_.first&&MaxEdgeVoxel_.second!=-1)
+			  {
+				  for (auto tempvoxel : VoxelNum_) {
+					  if (edgevoxel_set_.find(tempvoxel.first->getLabel()) != edgevoxel_set_.end()) {
+						  MaxEdgeVoxel_ = tempvoxel.second > MaxEdgeVoxel_.second ? tempvoxel : MaxEdgeVoxel_;
+					  }
+				  }
+				  if (!MaxEdgeVoxel_.first) {
+					  MaxEdgeVoxel_ = { nullptr,-1};
+				  }
+			  }
+			  return MaxEdgeVoxel_.first;
 		  }
 		  bool isempty() {
 			  if (!MaxVoxel_.first) {
@@ -146,8 +167,10 @@ namespace ORBSLAM2
 			  }
 			  return false;
 		  }
+		
 		  std::unordered_map<SupervoxelHelper*, int> VoxelNum_;
 		  std::pair<SupervoxelHelper*, int> MaxVoxel_;
+		  std::pair<SupervoxelHelper*, int> MaxEdgeVoxel_;
 	  };
 
       typedef pcl::octree::OctreePointCloudAdjacencyContainer<PointT, VoxelData> LeafContainerT;
@@ -278,6 +301,10 @@ namespace ORBSLAM2
       typename pcl::PointCloud<pcl::PointXYZL>::Ptr
       getLabeledCloud () const;
 
+	  pcl::PointCloud<pcl::PointXYZL>::Ptr getFullLabeledWithMarginCloud(const boost::unordered_set<uint32_t> &MarginVoxellabel);
+	  
+	  boost::unordered_set<uint32_t> setMarginVoxelAdaptive(cv::Rect rect, float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
+
 	  boost::unordered_set<uint32_t> setMarginVoxel(cv::Rect rect, double gridresolution, float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
       /** \brief Returns an RGB colorized voxelized cloud showing superpixels
        * Otherwise it returns an empty pointer.
@@ -326,6 +353,8 @@ namespace ORBSLAM2
 
 	  /** \brief Octree Adjacency structure with leaves at voxel resolution */
 	  typename OctreeAdjacencyT::Ptr adjacency_octree_;
+	  typedef boost::ptr_list<SupervoxelHelper> HelperListT;
+	  HelperListT supervoxel_helpers_;
     private:
       /** \brief This method simply checks if it is possible to execute the segmentation algorithm with
         * the current settings. If it is possible then it returns true.
@@ -452,6 +481,8 @@ namespace ORBSLAM2
           void 
           getVoxels (typename pcl::PointCloud<PointT>::Ptr &voxels) const;
 
+
+
           void 
           getNormals (typename pcl::PointCloud<pcl::Normal>::Ptr &normals) const;
 
@@ -508,10 +539,10 @@ namespace ORBSLAM2
 			  this->label_ = label_;
 		  }
 		 
+		  LeafSetT leaves_;
         private:
           //Stores leaves
-
-          LeafSetT leaves_;
+          
           uint32_t label_;
           VoxelData centroid_;
           SupervoxelClustering* parent_;
@@ -523,8 +554,8 @@ namespace ORBSLAM2
       //Make boost::ptr_list can access the private class SupervoxelHelper
       friend void boost::checked_delete<> (const typename ORBSLAM2::SupervoxelClustering<PointT>::SupervoxelHelper *);
 
-      typedef boost::ptr_list<SupervoxelHelper> HelperListT;
-      HelperListT supervoxel_helpers_;
+      
+
 
 
       //TODO DEBUG REMOVE
