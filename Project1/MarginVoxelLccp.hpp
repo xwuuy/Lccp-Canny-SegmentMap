@@ -29,6 +29,15 @@ void ORBSLAM2::MarginVoxelLccp::setSuperVoxel(float color_importance, float spat
 	super.getSupervoxelAdjacency(supervoxel_adjacency);
 }
 
+void ORBSLAM2::MarginVoxelLccp::setSuperVoxelWithoutMargin(float color_importance, float spatial_importance, float normal_importance) {
+	super.setInputCloud(edgeCloud);
+	super.setColorImportance(color_importance);
+	super.setSpatialImportance(spatial_importance);
+	super.setNormalImportance(normal_importance);
+	super.extract(supervoxel_clusters);
+	super.refineSupervoxels(1, supervoxel_clusters);
+	super.getSupervoxelAdjacency(supervoxel_adjacency);
+}
 void ORBSLAM2::MarginVoxelLccp::setSuperVoxelAdaptive(float color_importance, float spatial_importance, float normal_importance) {
 	super.setInputCloud(edgeCloud);
 	super.setColorImportance(color_importance);
@@ -54,6 +63,7 @@ void ORBSLAM2::MarginVoxelLccp::createLccp(float concavity_tolerance_threshold, 
 
 uint ORBSLAM2::MarginVoxelLccp::BFS(const uint32_t &seed, const boost::unordered_map<uint32_t, std::pair<int, PointCloudT::Ptr>>& matchPointCloud,  std::unordered_set<uint32_t> &connectedvertexes, const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_, const std::map<uint32_t, std::set<uint32_t> > &seg_label_to_sv_list_map_, std::unordered_set<uint32_t> &childgraph)
 {
+	childgraph.clear();
 	std::stack<uint32_t> stackvoxel;
 	auto itneigbor = seg_label_to_neighbor_set_map_.find(seed);
 	uint voxelnum = itneigbor->second.size();//获得当前分割区域包含的超体素
@@ -93,14 +103,20 @@ std::unordered_set<uint32_t> ORBSLAM2::MarginVoxelLccp::getMaxConnectedgraph(con
 	uint maxvoxelnum = 0;
 	std::unordered_set<uint32_t> childgraph;
 	/*首先对包含超体素最多的节点进行广度优先搜索*/
-	uint voxelnum = BFS(it->first, matchPointCloud, connectedvertexes, seg_label_to_neighbor_set_map_, seg_label_to_sv_list_map_, childgraph);
-	if (voxelnum >(matchedvoxelnum / 2)) {
-		return childgraph;
+	if ((float)it->second.first/(float) it->second.second->size()>maskProportion) {
+		uint voxelnum = BFS(it->first, matchPointCloud, connectedvertexes, seg_label_to_neighbor_set_map_, seg_label_to_sv_list_map_, childgraph);
+		if (voxelnum >(matchedvoxelnum / 2)) {
+			return childgraph;
+		}
 	}
 	it = matchPointCloud.begin();
 	while (it != matchPointCloud.end())
 	{
 		if (connectedvertexes.find(it->first) != connectedvertexes.end()) {
+			++it;
+			continue;
+		}
+		if ((float)it->second.first / (float)it->second.second->size() < maskProportion) {
 			++it;
 			continue;
 		}
@@ -225,20 +241,28 @@ PointCloudT::Ptr ORBSLAM2::MarginVoxelLccp::segmentObjVoxelCloud()
 	}
 
 
-	std::unordered_set<uint32_t> connectedGrap = getMaxConnectedgraph(matchPointCloud, lccp.seg_label_to_neighbor_set_map_, lccp.seg_label_to_sv_list_map_, seed.first, matchedvoxelnum);
 	PointCloudT::Ptr objcloud(new PointCloudT);
+
+	std::unordered_set<uint32_t> connectedGrap = getMaxConnectedgraph(matchPointCloud, lccp.seg_label_to_neighbor_set_map_, lccp.seg_label_to_sv_list_map_, seed.first, matchedvoxelnum);
+
 
 	for (auto i = connectedGrap.begin(); i != connectedGrap.end(); ++i)
 	{
 		auto pointcloud = matchPointCloud[*i];
-		float n = pointcloud.first;
-		float m = pointcloud.second->size();
-		float rate = n / m;
-		if (rate > maskProportion)
-		{
-			*objcloud += *pointcloud.second;//点云相加
-		}
+		*objcloud += *pointcloud.second;//点云相加
 	}
+
+	//for (auto i = connectedGrap.begin(); i != connectedGrap.end(); ++i)
+	//{
+	//	auto pointcloud = matchPointCloud[*i];
+	//	float n = pointcloud.first;
+	//	float m = pointcloud.second->size();
+	//	float rate = n / m;
+	//	if (rate > maskProportion)
+	//	{
+	//		*objcloud += *pointcloud.second;//点云相加
+	//	}
+	//}
 
 	return objcloud;
 }

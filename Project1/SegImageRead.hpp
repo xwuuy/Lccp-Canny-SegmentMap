@@ -13,7 +13,7 @@
 #include<pcl/io/pcd_io.h>
 #include<pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/pcl_visualizer.h>
-
+#include <pcl/common/time.h>
 const static float fx = 517.306408, fy = 516.469215, cx = 318.643040, cy = 255.313989;
 using namespace std;
 class ObjInfo {
@@ -311,7 +311,11 @@ public:
 		cv::imshow("rgb", rgb);
 		cv::Mat cn, gray;
 		cv::cvtColor(rgb, gray, cv::COLOR_BGR2GRAY);
+		pcl::StopWatch timer_;
+		double t_start = timer_.getTime();
 		cv::Canny(gray, cn, 50, 180);
+		double t_end = timer_.getTime();
+		std::cout << "Tota canny run time                                 =" << t_end - t_start << " ms\n";
 		cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5));
 		cv::dilate(cn, cn, element);
 		str1 = "C:/Users/16694/source/repos/Project1/rgbd_dataset_freiburg1_room/depth/" + depthpath + ".png";

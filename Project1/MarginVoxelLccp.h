@@ -12,6 +12,7 @@ class MarginVoxelLccp {
 	public:
 		MarginVoxelLccp(float voxel_resolution, float seed_resolution, PointCloudT::Ptr edgeCloud, cv::Mat mask, cv::Rect ROI, float maskProportion = 0.7, float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
 		void setSuperVoxel(float color_importance, float spatial_importance, float normal_importance);
+		void setSuperVoxelWithoutMargin(float color_importance, float spatial_importance, float normal_importance);
 		void setSuperVoxelAdaptive(float color_importance, float spatial_importance, float normal_importance);
 		void createLccp(float concavity_tolerance_threshold = 8, float smoothness_threshold = 0.01, std::uint32_t min_segment_size = 0, bool use_extended_convexity = false, bool use_sanity_criterion = false, unsigned int k_factor = 0);
 		template<class Point>

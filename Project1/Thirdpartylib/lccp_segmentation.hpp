@@ -473,10 +473,12 @@ pcl::LCCPSegmentation<PointT>::connIsConvex (const uint32_t source_label_arg,
 {
 	///*分三种情况，第一种两顶点皆为边缘体素，第二种两顶点有一个为边缘体素，第三种为两顶点皆不为边缘体素
 	//	第一种创建边，第二种和第三种不创建边*/
-	if ((marginvoxel_set_.find(source_label_arg) != marginvoxel_set_.end()) || (marginvoxel_set_.find(target_label_arg) != marginvoxel_set_.end())) {
-		return false;
+	if (!marginvoxel_set_.empty())
+	{
+		if ((marginvoxel_set_.find(source_label_arg) != marginvoxel_set_.end()) || (marginvoxel_set_.find(target_label_arg) != marginvoxel_set_.end())) {
+			return false;
+		}
 	}
-
   typename pcl::Supervoxel<PointT>::Ptr& sv_source = sv_label_to_supervoxel_map_[source_label_arg];
   typename pcl::Supervoxel<PointT>::Ptr& sv_target = sv_label_to_supervoxel_map_[target_label_arg];
 

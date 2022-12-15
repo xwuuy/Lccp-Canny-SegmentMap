@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>-num 1305031914.433060 -index 0 -v 0.014 -s 0.06 -n 0.6   -refine -R 1,1,1,1 -sc -ct 10 </LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-num 1305031911.035050 -index 0 -v 0.02 -s 0.06 -n 0.6   -refine -R 1,1,1,1 -sc -ct 10 -LC</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='project2|x64'">
