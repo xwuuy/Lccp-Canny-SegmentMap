@@ -29,6 +29,11 @@ TUM数据集 rgbd_dataset_freiburg1_room序列
 
 ### 使用方法：
 编译文件
-执行
+
+    mkdir build  
+    cmake ..  
+    make  
+    
+执行命令  
 
     "SegmentMap.exe --Dataset" 数据集目录 -t 数据集目录/KeyFrameTrajectory.txt -c 0.2 -s 0.4 -n 0.6 -C 15 -S 0.01"
