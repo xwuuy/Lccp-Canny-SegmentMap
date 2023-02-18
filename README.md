@@ -13,7 +13,7 @@
 ![ZVWiJitcQp](https://user-images.githubusercontent.com/51278459/219844418-508c382b-cc2e-4356-a837-24c292d0b58b.png "LCCP分割结果图")
 
     原始分割结果图：
-![CloudCompare_XShUvUT8KK](https://user-images.githubusercontent.com/51278459/219712022-b9059be3-0e34-4766-8d82-43a8bffe3cbe.png)
+![CloudCompare_XShUvUT8KK](https://user-images.githubusercontent.com/51278459/219712022-b9059be3-0e34-4766-8d82-43a8bffe3cbe.png "原始分割结果图")
 
 ## 环境概览
 ### 测试环境
