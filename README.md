@@ -22,10 +22,10 @@
 
 ## 环境概览
 ### 测试环境
-系统：win10 
-编译器：MSVC2017 64bit、cmake 3.5
-库：pcl 1.9.1、boost 1.6.8、opencv 4.2.0、yaml 0.6.0
-实例分割网络：YOLACT++，权重：yolact_plus_resnet50_54_800000
+系统：win10  
+编译器：MSVC2017 64bit、cmake 3.5  
+第三方库：pcl 1.9.1、boost 1.6.8、opencv 4.2.0、yaml 0.6.0  
+实例分割网络：YOLACT++，权重：yolact_plus_resnet50_54_800000  
 
 ### 测试数据集
 TUM数据集 rgbd_dataset_freiburg1_room序列
