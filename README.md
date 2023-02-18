@@ -1,6 +1,6 @@
 # lccp & Canny SegmentMap
 基于lccp与边缘检测的三维点云分割方法
-改善二维实例分割生成的点云。
+改善二维实例分割生成的点云，生成分割点云地图。
 ## 实验效果图
     Ours分割结果：
 ![OursSegmentPointCloud 00_00_00-00_00_30](https://user-images.githubusercontent.com/51278459/219711628-438bc954-5d7e-4409-98dc-9d3585e894df.gif "Ours分割结果")
