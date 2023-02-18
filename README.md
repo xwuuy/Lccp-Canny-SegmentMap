@@ -2,14 +2,9 @@
 基于lccp与边缘检测的三维点云分割方法。  
 主要内容：改善二维实例分割生成的点云，并生成分割点云地图。
 ## 实验效果图
-    Ours分割结果：
-![OursSegmentPointCloud 00_00_00-00_00_30](https://user-images.githubusercontent.com/51278459/219711628-438bc954-5d7e-4409-98dc-9d3585e894df.gif "Ours分割结果")
+    分割结果对比视频：
+![SegmentMap项目演示 00_00_00-00_00_30](https://user-images.githubusercontent.com/51278459/219853704-37019f53-a3d0-427b-9f5e-29ecdfa8571a.gif "分割结果对比视频")
 
-    LCCP分割结果：
-![LccpSegmentPointCloud 00_00_00-00_00_30](https://user-images.githubusercontent.com/51278459/219711607-eccbc0c1-4d69-40f1-b527-d549ba2ca589.gif "LCCP分割结果")
-
-    原始分割结果：
-![SegmentPointCloud 00_00_00-00_00_30](https://user-images.githubusercontent.com/51278459/219711635-e0e60b12-3ea3-4de4-a443-cca95a673ada.gif "原始分割结果")
 
     Ours分割结果图：
 ![VmjjUG80PE](https://user-images.githubusercontent.com/51278459/219712001-74d56ce4-d69e-4c99-97ee-c86031abf2ee.png "Ours分割结果图")
