@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef MarginVoxelLccp_hpp
 #define MarginVoxelLccp_hpp
 
@@ -9,6 +9,18 @@ using PointT = pcl::PointXYZRGBA;  // The point type used for input
 typedef pcl::PointCloud<PointT> PointCloudT;
 namespace ORBSLAM2 {
 class MarginVoxelLccp {
+    class matchDetail{
+    public:
+        matchDetail(size_t matchPoint_Num, size_t matchVoxel_Num,PointCloudT::Ptr total_Point):
+            matchPointNum(matchPoint_Num),matchVoxelNum(matchVoxel_Num),totalPoint(total_Point)
+        {
+
+        }
+        size_t matchPointNum;//num of Points in Mask
+        size_t matchVoxelNum;//num of supervoxel in Mask
+        PointCloudT::Ptr totalPoint;// lccp segment Pointcloud
+        typedef boost::shared_ptr<matchDetail> Ptr;
+    };
 	public:
         MarginVoxelLccp(float voxel_resolution, float seed_resolution, PointCloudT::Ptr edgeCloud, cv::Rect pointRect,
                         cv::Mat mask, cv::Rect ROI,
@@ -19,7 +31,7 @@ class MarginVoxelLccp {
         void setSuperVoxel(float color_importance, float spatial_importance, float normal_importance);
 		void setSuperVoxelWithoutMargin(float color_importance, float spatial_importance, float normal_importance);
 		void setSuperVoxelAdaptive(float color_importance, float spatial_importance, float normal_importance);
-        void createLccp(float concavity_tolerance_threshold = 30, float smoothness_threshold = 0.01, std::uint32_t min_segment_size = 0, bool use_sanity_criterion = true, unsigned int k_factor = 0);
+        void createLccp(float concavity_tolerance_threshold = 30, float smoothness_threshold = 0.01, std::uint32_t min_segment_size = 0, bool connect_MarginVoxel_arg=false, bool use_sanity_criterion = true, unsigned int k_factor = 0);
 		template<class Point>
 		bool isInMask(Point p) {
             int x =std::round( (p.x*fx / p.z + cx ));
@@ -38,12 +50,17 @@ class MarginVoxelLccp {
             return sv_adjacency_list;
 		}
 
-        uint BFS(const uint32_t &seed,  boost::unordered_map<uint32_t, std::pair<int, PointCloudT::Ptr>>& matchPointCloud, /*std::unordered_set<uint32_t> &connectedvertexes, */const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_, const std::map<uint32_t, std::set<uint32_t> > &seg_label_to_sv_list_map_,
-                 std::unordered_set<uint32_t> &childgraph,uint &matchedvoxelnum);
+        uint BFS(uint32_t seed,  boost::unordered_map<uint32_t, std::pair<size_t, PointCloudT::Ptr>>& matchPointCloud, /*std::unordered_set<uint32_t> &connectedvertexes, */const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_, const std::map<uint32_t, std::set<uint32_t> > &seg_label_to_sv_list_map_,
+                 std::unordered_set<uint32_t> &childgraph);
+        uint BFS(uint32_t seed,  boost::unordered_map<uint32_t, matchDetail::Ptr>& matchPointCloud, /*std::unordered_set<uint32_t> &connectedvertexes, */const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_,
+                 std::unordered_set<uint32_t> &childgraph);
 		std::unordered_set<uint32_t> getMaxConnectedgraph
-        ( boost::unordered_map<uint32_t, std::pair<int, PointCloudT::Ptr>> matchPointCloud, const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_, const std::map<uint32_t, std::set<uint32_t> > &seg_label_to_sv_list_map_, const uint32_t &seed,  uint matchedvoxelnum);
-		PointCloudT::Ptr segmentObjPoinCloud();
-		PointCloudT::Ptr segmentObjVoxelCloud();
+        ( boost::unordered_map<uint32_t, std::pair<size_t, PointCloudT::Ptr>> matchPointCloud, const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_, const std::map<uint32_t, std::set<uint32_t> > &seg_label_to_sv_list_map_, const uint32_t &seed,  uint matchedvoxelnum);
+        std::unordered_set<uint32_t> getMaxConnectedgraph
+        ( boost::unordered_map<uint32_t, matchDetail::Ptr> matchPointCloud, const std::map<uint32_t, std::set<uint32_t>> &seg_label_to_neighbor_set_map_, const std::map<uint32_t, std::set<uint32_t> > &seg_label_to_sv_list_map_, const uint32_t &seed,  uint matchedvoxelnum);
+
+        PointCloudT::Ptr segmentObjPoinCloud(int seedSflag=0);
+        PointCloudT::Ptr segmentObjVoxelCloud(int seedSflag=0);
 		PointCloudT::Ptr edgeCloud;
         pcl::PointCloud<pcl::PointXYZL>::Ptr spuervoxellabelCloud(){
             return super.getFullLabeledWithMarginCloud(marginvoxel_set_);
@@ -66,6 +83,7 @@ class MarginVoxelLccp {
 		float cx;
 		float cy;
 	private:
+
 		float maskProportion;
 		std::map<std::uint32_t, pcl::Supervoxel<PointT>::Ptr> supervoxel_clusters;
 		std::multimap<std::uint32_t, std::uint32_t> supervoxel_adjacency;

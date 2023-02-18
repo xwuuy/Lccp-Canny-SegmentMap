@@ -1,4 +1,4 @@
-
+﻿
 
 #ifndef ORBSLAM2_SEGMENTATION_SUPERVOXEL_CLUSTERING_H_
 #define ORBSLAM2_SEGMENTATION_SUPERVOXEL_CLUSTERING_H_
@@ -14,6 +14,7 @@
 #include <opencv2/core/core.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/bind.hpp>
+#include <boost/checked_delete.hpp>
 #include <type_traits>
 //DEBUG TODO REMOVE
 #include <pcl/common/time.h>
@@ -118,6 +119,7 @@ namespace ORBSLAM2
            */
           void
           getNormal (pcl::Normal &normal_arg) const;
+
 
           Eigen::Vector3f xyz_;
           Eigen::Vector3f rgb_;
@@ -307,9 +309,9 @@ namespace ORBSLAM2
 
       pcl::PointCloud<pcl::PointXYZL>::Ptr getFullLabeledWithMarginCloud(const boost::unordered_set<uint32_t> &MarginVoxellabel);
 
-      boost::unordered_set<uint32_t> setMarginVoxelAdaptive(cv::Rect rect, float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
+      void setMarginVoxelAdaptive(cv::Rect rect, boost::unordered_set<uint32_t> &marginvoxel_set_,float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
 
-      boost::unordered_set<uint32_t> setMarginVoxel(cv::Rect rect, double gridresolution, float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
+      void setMarginVoxel(cv::Rect rect, double gridresolution, boost::unordered_set<uint32_t> &marginvoxel_set_, float fx = 517.306408, float fy = 516.469215, float cx = 318.643040, float cy = 255.313989);
       /** \brief Returns an RGB colorized voxelized cloud showing superpixels
        * Otherwise it returns an empty pointer.
        * Points that belong to the same supervoxel have the same color.
@@ -556,10 +558,6 @@ namespace ORBSLAM2
 
       //Make boost::ptr_list can access the private class SupervoxelHelper
       friend void boost::checked_delete<> (const typename ORBSLAM2::SupervoxelClustering<PointT>::SupervoxelHelper *);
-
-
-
-
 
       //TODO DEBUG REMOVE
       pcl::StopWatch timer_;

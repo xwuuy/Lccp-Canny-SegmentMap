@@ -1,4 +1,4 @@
-#ifndef ORBSLAM2_SEGMENTATION_SUPERVOXEL_CLUSTERING_HPP_
+﻿#ifndef ORBSLAM2_SEGMENTATION_SUPERVOXEL_CLUSTERING_HPP_
 #define ORBSLAM2_SEGMENTATION_SUPERVOXEL_CLUSTERING_HPP_
 #include"supervoxel_clustering.h"
 
@@ -623,9 +623,9 @@ template<typename PointT>
 
 
 template<>
-boost::unordered_set<uint32_t> ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>::setMarginVoxel(cv::Rect rect,double gridresolution, float fx, float fy , float cx , float cy )
+void ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>::setMarginVoxel(cv::Rect rect,double gridresolution, boost::unordered_set<uint32_t> &marginvoxel_set_,float fx, float fy , float cx , float cy )
 {
-    boost::unordered_set<uint32_t>  marginvoxel_set_;
+//    boost::unordered_set<uint32_t>  marginvoxel_set_;
     boost::unordered_set<uint32_t>  edgevoxel_set_;
     int gridwidth = std::ceil(rect.width / gridresolution);
     int gridheight = std::ceil(rect.height / gridresolution);
@@ -734,7 +734,6 @@ boost::unordered_set<uint32_t> ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>
         }
     }
 
-    return marginvoxel_set_;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -870,7 +869,7 @@ namespace ORBSLAM2
         ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>::VoxelData::getPoint(pcl::PointXYZRGBA &point_arg) const;
 
     template<>
-        boost::unordered_set<uint32_t> ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>::setMarginVoxelAdaptive(cv::Rect rect, float fx, float fy, float cx, float cy);
+        void ORBSLAM2::SupervoxelClustering<pcl::PointXYZRGBA>::setMarginVoxelAdaptive(cv::Rect rect,boost::unordered_set<uint32_t> &marginvoxel_set_, float fx, float fy, float cx, float cy);
 
     template<typename PointT> void
         ORBSLAM2::SupervoxelClustering<PointT>::VoxelData::getPoint(PointT &point_arg) const

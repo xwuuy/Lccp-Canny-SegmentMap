@@ -74,8 +74,9 @@ namespace pcl
       /** \brief Additional member used for the CPC algorithm. If edge has already induced a cut, it should be ignored for further cutting.*/
       bool used_for_cutting;
       
+      bool is_concave_with_Margin;
       EdgeProperties () :
-      normal_difference (0), is_convex (false), is_valid (false), used_for_cutting (false) 
+      normal_difference (0), is_convex (false), is_valid (false), used_for_cutting (false) ,is_concave_with_Margin(false)
       {
       }
     };
@@ -248,6 +249,13 @@ namespace pcl
         min_segment_size_ = min_segment_size_arg;
       }
 
+      inline void
+      setconnectMarginVoxel (bool connect_MarginVoxel_arg)
+      {
+        connect_MarginVoxel = connect_MarginVoxel_arg;
+      }
+
+
 	  /** \brief Storing relation between original SuperVoxel Labels and new segmantion labels.
 	  *  \note sv_label_to_seg_label_map_[old_labelID] = new_labelID */
 	  std::map<uint32_t, uint32_t> sv_label_to_seg_label_map_;
@@ -331,6 +339,9 @@ namespace pcl
       /** \brief Determines if the smoothness check is used during segmentation*/
       bool use_smoothness_check_;
 
+      //É¾³ý±ßÔµ³¬ÌåµÄ±ß
+      bool connect_MarginVoxel;
+
       /** \brief Two supervoxels are unsmooth if their plane-to-plane distance DIST >  (expected_distance + smoothness_threshold_*voxel_resolution_). For parallel supervoxels, the expected_distance is zero. */
       float smoothness_threshold_;
 
@@ -359,11 +370,8 @@ namespace pcl
       /** \brief map from the supervoxel labels to the supervoxel objects  */
       std::map<uint32_t, typename pcl::Supervoxel<PointT>::Ptr> sv_label_to_supervoxel_map_;
 
-     
 
-     
-
-	  //±£´æ±ßÔµÌåËØ
+      /** \brief Margin supervoxel id  */
 	  boost::unordered_set<uint32_t>  marginvoxel_set_;
 
   };
