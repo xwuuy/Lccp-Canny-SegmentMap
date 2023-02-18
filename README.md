@@ -31,6 +31,7 @@ TUM数据集 rgbd_dataset_freiburg1_room序列
 编译文件
 
     mkdir build  
+    cd build
     cmake ..  
     make  
     
