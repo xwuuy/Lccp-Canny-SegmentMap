@@ -28,8 +28,8 @@
 实例分割网络：YOLACT++，权重：yolact_plus_resnet50_54_800000  
 
 ### 测试数据集
-TUM数据集 rgbd_dataset_freiburg1_room序列
-百度网盘 链接：https://pan.baidu.com/s/1mh8ELvMx0nrTP37GEwXyNA 
+TUM数据集 rgbd_dataset_freiburg1_room序列  
+百度网盘 链接：https://pan.baidu.com/s/1mh8ELvMx0nrTP37GEwXyNA  
 提取码：in26
 
 ### 使用方法：
