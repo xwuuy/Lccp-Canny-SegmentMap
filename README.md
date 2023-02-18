@@ -1,4 +1,4 @@
-# lccp & Canny Refine Mask Point
+# lccp & Canny SegmentMap
 基于lccp与边缘检测的三维点云分割方法
 改善二维实例分割生成的点云。
 ## 实验效果图
