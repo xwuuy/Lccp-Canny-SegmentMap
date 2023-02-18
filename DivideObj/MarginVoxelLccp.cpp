@@ -38,9 +38,9 @@ ORBSLAM2::MarginVoxelLccp::MarginVoxelLccp(PointCloudT::Ptr edgeCloud, cv::Rect 
         super=ORBSLAM2::SupervoxelClustering<PointT>( 0.02,0.12);
     }else{
         if(shorter>100){
-            super=ORBSLAM2::SupervoxelClustering<PointT>(0.014,0.08 );
+            super=ORBSLAM2::SupervoxelClustering<PointT>(0.014,0.09 );
         }else{
-            super=ORBSLAM2::SupervoxelClustering<PointT>(0.008, 0.04);
+            super=ORBSLAM2::SupervoxelClustering<PointT>(0.008, 0.06);
         }
     }
 }
@@ -265,9 +265,9 @@ std::unordered_set<uint32_t> ORBSLAM2::MarginVoxelLccp::getMaxConnectedgraph
 
 PointCloudT::Ptr ORBSLAM2::MarginVoxelLccp::segmentObjPoinCloud(int seedSflag) {
 	lccp.segment();
-
-    boost::unordered_map<uint32_t, std::pair<size_t, PointCloudT::Ptr>> matchPointCloud;
+    boost::unordered_map<uint32_t, matchDetail::Ptr> matchPointCloud;
     std::pair<uint32_t, size_t> seed(0,0);//选择包含超体素最多的做为种子
+    boost::unordered_set<uint32_t> inmaskVoxel;
 	uint matchedvoxelnum = 0;
 	for (auto i_labeled = edgeCloud->begin(); i_labeled != edgeCloud->end(); ++i_labeled)
 	{
@@ -277,7 +277,8 @@ PointCloudT::Ptr ORBSLAM2::MarginVoxelLccp::segmentObjPoinCloud(int seedSflag) {
 			ORBSLAM2::SupervoxelClustering<PointT>::VoxelData& voxel_data = leaf->getData();
 			if (voxel_data.owner_)
 			{
-				uint32_t label = lccp.sv_label_to_seg_label_map_[voxel_data.owner_->getLabel()];
+                auto voxelabel=voxel_data.owner_->getLabel();
+                uint32_t label = lccp.sv_label_to_seg_label_map_[voxelabel];
 				//i_labeled->r = 255;
 				//i_labeled->g = 255;
 				//i_labeled->b = 255;
@@ -287,26 +288,27 @@ PointCloudT::Ptr ORBSLAM2::MarginVoxelLccp::segmentObjPoinCloud(int seedSflag) {
 					if (inMask) {
                         size_t size = lccp.seg_label_to_sv_list_map_[label].size();
                         seed = seed.second < size ?  std::make_pair(label,size) :seed ;
-                        if(res->second.first==0){
-                            matchedvoxelnum+= size;
+                        if(inmaskVoxel.find(voxelabel)==inmaskVoxel.end()){
+                            matchedvoxelnum++;
+                            inmaskVoxel.insert(voxelabel);
+                            ++res->second->matchVoxelNum;
                         }
-                        ++res->second.first;//add voxel in mask num
+                        ++res->second->matchPointNum;//add voxel in mask num
 					}
-					res->second.second->push_back(*i_labeled);
+                    res->second->totalPoint->push_back(*i_labeled);
 				}
-				else {
-                    PointCloudT::Ptr inVoxelPoint(new PointCloudT());
-					std::pair<int, PointCloudT::Ptr > pnum;
+                else {
+                    matchDetail::Ptr mm(new matchDetail);
 					if (inMask) {
-						matchedvoxelnum+= lccp.seg_label_to_sv_list_map_[label].size();;
-						pnum.first = 1;
-					}
-					else {
-						pnum.first = 0;
-					}
-                    inVoxelPoint->push_back(*i_labeled);
-                    pnum.second = inVoxelPoint;
-					matchPointCloud.insert({ label ,pnum });
+                        if(inmaskVoxel.find(voxelabel)==inmaskVoxel.end()){
+                            matchedvoxelnum++;
+                            inmaskVoxel.insert(voxelabel);
+                            ++mm->matchVoxelNum;
+                        }
+                        ++mm->matchPointNum;
+                    }
+                    mm->totalPoint->push_back(*i_labeled);
+                    matchPointCloud.insert({ label ,mm });
 				}
 			}
 		}
@@ -321,24 +323,23 @@ PointCloudT::Ptr ORBSLAM2::MarginVoxelLccp::segmentObjPoinCloud(int seedSflag) {
     std::unordered_set<uint32_t> connectedGrap = getMaxConnectedgraph(
                 matchPointCloud, lccp.seg_label_to_neighbor_set_map_, lccp.seg_label_to_sv_list_map_,seed.first, matchedvoxelnum);
 
-    for (auto i = matchPointCloud.begin(); i != matchPointCloud.end(); ++i)
-    {
-        *objcloud += *(i->second.second);//点云相加
-    }
-	
-//	for (auto i = connectedGrap.begin(); i != connectedGrap.end(); ++i)
-//	{
-//		auto pointcloud = matchPointCloud[*i];
-//        if(pointcloud.second)
-//            *objcloud += *pointcloud.second;//点云相加
+//    for (auto i = matchPointCloud.begin(); i != matchPointCloud.end(); ++i)
+//    {
+//        *objcloud += *(i->second.second);//点云相加
 //    }
+	
+    for (auto i = connectedGrap.begin(); i != connectedGrap.end(); ++i)
+    {
+        auto pointcloud = matchPointCloud[*i];
+        if(pointcloud->totalPoint)
+            *objcloud += *pointcloud->totalPoint;//点云相加
+    }
 	return objcloud;
 }
 
 PointCloudT::Ptr ORBSLAM2::MarginVoxelLccp::segmentObjVoxelCloud(int seedSflag)
 {
 	lccp.segment();
-    /** \brief uint32_t lccpSegmentId   */
     boost::unordered_map<uint32_t, matchDetail::Ptr> matchPointCloud;
     std::pair<uint32_t, size_t> seed(0,0);//选择在mask内超体素最多的做为种子
 	uint matchedvoxelnum = 0;

@@ -11,14 +11,19 @@ namespace ORBSLAM2 {
 class MarginVoxelLccp {
     class matchDetail{
     public:
-        matchDetail(size_t matchPoint_Num, size_t matchVoxel_Num,PointCloudT::Ptr total_Point):
-            matchPointNum(matchPoint_Num),matchVoxelNum(matchVoxel_Num),totalPoint(total_Point)
+        matchDetail():
+            matchPointNum(0),matchVoxelNum(0),totalPoint(new PointCloudT)
         {
 
         }
-        size_t matchPointNum;//num of Points in Mask
-        size_t matchVoxelNum;//num of supervoxel in Mask
-        PointCloudT::Ptr totalPoint;// lccp segment Pointcloud
+        matchDetail(size_t matchPoint_Num, size_t matchVoxel_Num,PointCloudT::Ptr total_Point):
+            matchPointNum(matchPoint_Num),matchVoxelNum(matchVoxel_Num)
+        {
+           totalPoint=total_Point;
+        }
+        size_t matchPointNum;
+        size_t matchVoxelNum;
+        PointCloudT::Ptr totalPoint;
         typedef boost::shared_ptr<matchDetail> Ptr;
     };
 	public:
@@ -31,7 +36,7 @@ class MarginVoxelLccp {
         void setSuperVoxel(float color_importance, float spatial_importance, float normal_importance);
 		void setSuperVoxelWithoutMargin(float color_importance, float spatial_importance, float normal_importance);
 		void setSuperVoxelAdaptive(float color_importance, float spatial_importance, float normal_importance);
-        void createLccp(float concavity_tolerance_threshold = 30, float smoothness_threshold = 0.01, std::uint32_t min_segment_size = 0, bool connect_MarginVoxel_arg=false, bool use_sanity_criterion = true, unsigned int k_factor = 0);
+        void createLccp(float concavity_tolerance_threshold = 30, float smoothness_threshold = 0.01, std::uint32_t min_segment_size = 0, bool connect_MarginVoxel_arg=true, bool use_sanity_criterion = true, unsigned int k_factor = 0);
 		template<class Point>
 		bool isInMask(Point p) {
             int x =std::round( (p.x*fx / p.z + cx ));
