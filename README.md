@@ -34,7 +34,7 @@ TUM数据集 rgbd_dataset_freiburg1_room序列
     mkdir build  
     cd build  
     cmake [-G generator] [-DBUILD_SHARED_LIBS=ON|OFF] ..  
-    make
+    make  
     编译本工程  
     mkdir build  
     cd build
