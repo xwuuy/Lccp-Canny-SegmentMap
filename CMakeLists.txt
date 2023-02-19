@@ -16,7 +16,7 @@ FIND_PACKAGE(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/YamlLib/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp/include
     )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/DivideObj)
@@ -29,7 +29,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         #    ${BOOST_LIBRARIES}
         #    ${PCL_LIBRARIES}
         #    ${OpenCV_LIBRARIES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/YamlLib/Release/libyaml-cppmd.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp/build/Release/libyaml-cppmd.lib
         DivideObj
         Qt5::Core
         )
@@ -38,7 +38,7 @@ else(CMAKE_BUILD_TYPE STREQUAL "Release")
         #    ${BOOST_LIBRARIES}
         #    ${PCL_LIBRARIES}
         #    ${OpenCV_LIBRARIES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/YamlLib/Debug/libyaml-cppmdd.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp/build/Debug/libyaml-cppmdd.lib
         DivideObj
         Qt5::Core
         )
