@@ -1,4 +1,4 @@
-# lccp & Canny SegmentMap
+# lccp & Canny SegmentMap 
 基于lccp与边缘检测的三维点云分割方法。  
 主要内容：改善二维实例分割生成的点云，并生成分割点云地图。
 ## 实验效果图
