@@ -29,11 +29,16 @@ TUM数据集 rgbd_dataset_freiburg1_room序列
 
 ### 使用方法：
 编译文件
-首先编译yaml
-
+    首先编译yaml_cpp  
+    cd yaml_cpp  
+    mkdir build  
+    cd build  
+    cmake [-G generator] [-DBUILD_SHARED_LIBS=ON|OFF] ..  
+    make
+    编译本工程  
     mkdir build  
     cd build
-    cmake ..  
+    cmake [-G generator] [-DBUILD_SHARED_LIBS=ON|OFF] ..  
     make  
     
 执行命令  
