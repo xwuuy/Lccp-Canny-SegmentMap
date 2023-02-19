@@ -371,7 +371,7 @@ namespace pcl
       std::map<uint32_t, typename pcl::Supervoxel<PointT>::Ptr> sv_label_to_supervoxel_map_;
 
 
-      /** \brief Margin supervoxel id  */
+	  //±£´æ±ßÔµÌåËØ
 	  boost::unordered_set<uint32_t>  marginvoxel_set_;
 
   };
