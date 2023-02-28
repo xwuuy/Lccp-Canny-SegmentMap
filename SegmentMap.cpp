@@ -1,10 +1,4 @@
-﻿/*************************************************************************
-   > File Name: src/joinMap.cpp
-   > Author: Gao Xiang
-   > Mail: gaoxiang12@mails.tsinghua.edu.cn
-   > Created Time: 2015年12月13日 星期日 14时37分05秒
-************************************************************************/
-
+﻿
 #include <iostream>
 #include <vector>
 #include <thread>
