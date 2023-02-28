@@ -70,7 +70,10 @@ int main( int argc, char** argv )
             ("spatial_importance,s",po::value<float>(),"the spatial_importance name which want to be found")
             ("normal_importance,n",po::value<float>(),"the normal_importance name which want to be found")
             ("concavity_tolerance_threshold,C",po::value<float>(),"the concavity_tolerance_threshold name which want to be found")
-            ("smoothness_threshold,S",po::value<float>(),"the smoothness_threshold name which want to be found");
+            ("smoothness_threshold,S",po::value<float>(),"the smoothness_threshold name which want to be found")
+            ("connect_MarginVoxel,M",po::value<bool>(),"the PointOrVoxel name which want to be found")
+            ("useLCCP,L" , "the PointOrVoxel name which want to be found")
+            ("useK_connect,K" , "the PointOrVoxel name which want to be found");
 
     try{
         //parse_command_line()对输入的选项做解析
@@ -78,13 +81,16 @@ int main( int argc, char** argv )
         po::store(po::parse_command_line(argc, argv, parser), vm);
     }
     catch(...){
-        std::cout << "输入的参数中存在未定义的选项！\n -Dataset 数据集根地址 -Trackfile 帧位姿地址 -color_importance 颜色权重 -spatial_importance 空间距离权重 -concavity_tolerance_threshold 凹凸性角度阈值 -smoothness_threshold平滑度阈值";
+        std::cout << "输入的参数中存在未定义的选项！\n";
         return 0;
     }
     string DatasetPath;
     string track_path;
     float spatial_importance=0.6f, color_importance=0.4f,normal_importance=0.4f ,smoothness_threshold=0.01f, concavity_tolerance_threshold=30;
-    std::uint32_t min_segment_size=0;
+    std::uint32_t K_connect=0;
+    if(vm.count("useK_connect")){
+        K_connect=1;
+    }
     if(vm.count("Dataset")&&vm.count("Trackfile")){
         DatasetPath=vm["Dataset"].as<string>();
         track_path=vm["Trackfile"].as<string>();
@@ -96,7 +102,7 @@ int main( int argc, char** argv )
     }
     bool useLCCP=false;
     if(vm.count("useLCCP")){
-        useLCCP=vm["useLCCP"].as<bool>();
+        useLCCP=true;
     }
     if(vm.count("color_importance")&&vm.count("spatial_importance")&&vm.count("normal_importance")
             &&vm.count("concavity_tolerance_threshold")&&vm.count("smoothness_threshold")){
@@ -170,7 +176,7 @@ int main( int argc, char** argv )
         cv::Mat depth=cv::imread(DatasetPath+imgFile->second.second,cv::IMREAD_UNCHANGED);
         vector<ObjInfo*> vinfos;
         cv::Mat  mask,object_mask;
-        ReadFile::imgread(DatasetPath,imgFile->first,imgFile->second.second,mask,object_mask,rgb,depth,vinfos);
+        ReadFile::imgread(DatasetPath,imgFile->first,imgFile->second.second,mask,object_mask,rgb,depth,vinfos,!useLCCP);
         cv::Mat personMask;
         ReadFile::generatePersonMask(personMask,vinfos);
         cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(51, 51));
@@ -193,7 +199,7 @@ int main( int argc, char** argv )
             //                else {
             mvl.setSuperVoxelAdaptive(color_importance, spatial_importance, normal_importance);
             //                }
-            mvl.createLccp(concavity_tolerance_threshold,smoothness_threshold,min_segment_size,connect_MarginVoxel,useLCCP);
+            mvl.createLccp(concavity_tolerance_threshold,smoothness_threshold,connect_MarginVoxel,K_connect);
 //            auto objcloud= mvl.segmentObjPoinCloud();
             auto objcloud= mvl.segmentObjVoxelCloud();
             auto end = std::chrono::high_resolution_clock::now();
@@ -289,7 +295,7 @@ int main( int argc, char** argv )
         voxel.filter(*temp);
         globalcloud+=*temp;
     }
-    std::cout << "函数运行时间，总："<<totalcus<<",每帧" << totalcus/numT << "毫秒/frame"<<", 点云留存率"<< (float)objSegRetain/(float)objtotal<< std::endl;
+    std::cout << "函数运行时间，总："<<totalcus<<",每帧" << totalcus/numT <<",per obj" << totalcus/objtotal << "毫秒/frame"<<", 点云留存率"<< (float)objSegRetain/(float)objtotal<< std::endl;
     pcl::io::savePCDFile("segmentPointMap.pcd",segmetcloud);
     pcl::io::savePCDFile("refinesegmentPointMap.pcd",segmetRefinecloud);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr global(&segmetcloud),segcloud(&segmetRefinecloud);

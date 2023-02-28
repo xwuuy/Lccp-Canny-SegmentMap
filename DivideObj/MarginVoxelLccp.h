@@ -36,7 +36,7 @@ class MarginVoxelLccp {
         void setSuperVoxel(float color_importance, float spatial_importance, float normal_importance);
 		void setSuperVoxelWithoutMargin(float color_importance, float spatial_importance, float normal_importance);
 		void setSuperVoxelAdaptive(float color_importance, float spatial_importance, float normal_importance);
-        void createLccp(float concavity_tolerance_threshold = 30, float smoothness_threshold = 0.01, std::uint32_t min_segment_size = 0, bool connect_MarginVoxel_arg=true, bool use_sanity_criterion = true, unsigned int k_factor = 0);
+        void createLccp(float concavity_tolerance_threshold = 30, float smoothness_threshold = 0.01,  bool connect_MarginVoxel_arg=true,unsigned int k_factor = 0, bool use_sanity_criterion = true, std::uint32_t min_segment_size = 0);
 		template<class Point>
 		bool isInMask(Point p) {
             int x =std::round( (p.x*fx / p.z + cx ));

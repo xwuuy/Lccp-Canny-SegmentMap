@@ -79,7 +79,7 @@ void ORBSLAM2::MarginVoxelLccp::setSuperVoxelAdaptive(float color_importance, fl
 	super.getSupervoxelAdjacency(supervoxel_adjacency);
 }
 
-void ORBSLAM2::MarginVoxelLccp::createLccp(float concavity_tolerance_threshold, float smoothness_threshold, std::uint32_t min_segment_size, bool connect_MarginVoxel_arg, bool use_sanity_criterion, unsigned int k_factor) {
+void ORBSLAM2::MarginVoxelLccp::createLccp(float concavity_tolerance_threshold, float smoothness_threshold,  bool connect_MarginVoxel_arg, unsigned int k_factor, bool use_sanity_criterion, std::uint32_t min_segment_size ) {
     lccp = pcl::LCCPSegmentation<PointT>();
 	lccp.setConcavityToleranceThreshold(concavity_tolerance_threshold);
 	lccp.setSanityCheck(use_sanity_criterion);
