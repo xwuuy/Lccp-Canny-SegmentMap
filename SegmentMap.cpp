@@ -176,7 +176,11 @@ int main( int argc, char** argv )
         cv::Mat depth=cv::imread(DatasetPath+imgFile->second.second,cv::IMREAD_UNCHANGED);
         vector<ObjInfo*> vinfos;
         cv::Mat  mask,object_mask;
+<<<<<<< HEAD
         ReadFile::imgread(DatasetPath,imgFile->first,imgFile->second.second,mask,object_mask,rgb,depth,vinfos,!useLCCP);
+=======
+        ReadFile::imgread(DatasetPath,imgFile->first,imgFile->second.second,mask,object_mask,rgb,depth,vinfos,useLCCP);
+>>>>>>> a3115f6c65b33c0d712af46cfa3ac4ad0d401c4f
         cv::Mat personMask;
         ReadFile::generatePersonMask(personMask,vinfos);
         cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(51, 51));
@@ -199,7 +203,11 @@ int main( int argc, char** argv )
             //                else {
             mvl.setSuperVoxelAdaptive(color_importance, spatial_importance, normal_importance);
             //                }
+<<<<<<< HEAD
             mvl.createLccp(concavity_tolerance_threshold,smoothness_threshold,connect_MarginVoxel,K_connect);
+=======
+            mvl.createLccp(concavity_tolerance_threshold,smoothness_threshold,min_segment_size,connect_MarginVoxel);
+>>>>>>> a3115f6c65b33c0d712af46cfa3ac4ad0d401c4f
 //            auto objcloud= mvl.segmentObjPoinCloud();
             auto objcloud= mvl.segmentObjVoxelCloud();
             auto end = std::chrono::high_resolution_clock::now();

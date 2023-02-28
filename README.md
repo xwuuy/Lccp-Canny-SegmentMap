@@ -2,7 +2,7 @@
 基于lccp与边缘检测的三维点云分割方法。  
 主要内容：改善二维实例分割生成的点云，并生成分割点云地图。
 ## 实验效果图
-    分割结果对比视频：
+    分割结果对比动图：
 ![SegmentMap项目演示 00_00_00-00_00_30](https://user-images.githubusercontent.com/51278459/219853704-37019f53-a3d0-427b-9f5e-29ecdfa8571a.gif "分割结果对比视频")
 
 
@@ -29,11 +29,17 @@ TUM数据集 rgbd_dataset_freiburg1_room序列
 
 ### 使用方法：
 编译文件
-首先编译yaml
 
+    首先编译yaml_cpp  
+    cd yaml_cpp  
+    mkdir build  
+    cd build  
+    cmake [-G generator] [-DBUILD_SHARED_LIBS=ON|OFF] ..  
+    make  
+    编译本工程  
     mkdir build  
     cd build
-    cmake ..  
+    cmake [-G generator] [-DBUILD_SHARED_LIBS=ON|OFF] ..  
     make  
     
 执行命令  
