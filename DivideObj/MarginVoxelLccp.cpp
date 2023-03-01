@@ -83,7 +83,10 @@ void ORBSLAM2::MarginVoxelLccp::createLccp(float concavity_tolerance_threshold, 
     lccp = pcl::LCCPSegmentation<PointT>();
 	lccp.setConcavityToleranceThreshold(concavity_tolerance_threshold);
 	lccp.setSanityCheck(use_sanity_criterion);
-	lccp.setSmoothnessCheck(true, super.getVoxelResolution(), super.getSeedResolution(), smoothness_threshold);
+	if(smoothness_threshold>0)
+	{
+		lccp.setSmoothnessCheck(true, super.getVoxelResolution(), super.getSeedResolution(), smoothness_threshold);
+	}
 	lccp.setKFactor(k_factor);
 	lccp.setInputSupervoxels(supervoxel_clusters, supervoxel_adjacency, marginvoxel_set_);
     lccp.setMinSegmentSize(min_segment_size);
