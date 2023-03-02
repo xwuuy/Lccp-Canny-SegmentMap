@@ -1,4 +1,11 @@
-﻿#ifndef READFILE_HPP
+/*************************************************************************
+    > File Name: ReadFile.hpp
+    > Author: Xu Wen Yu
+    > Mail: xwy17671242087@163.com
+    > Created Time: 2023-03-01
+ ************************************************************************/
+
+#ifndef READFILE_HPP
 #define READFILE_HPP
 #include<algorithm>
 #include<fstream>
@@ -149,7 +156,7 @@ public:
                            , vector<string> &vTimestamps);
     static  void LoadTrack(const string &strTrackFilename, FrameTrackIDMap &vstrTrackPoses);
 
-    static void imgread(string objpath, std::string Filename, std::string depthpath, cv::Mat &mask, cv::Mat &object_mask, cv::Mat &rgb, cv::Mat &depth, vector<ObjInfo*> &vinfos);
+    static void imgread(string objpath, std::string Filename, std::string depthpath, cv::Mat &mask, cv::Mat &object_mask, cv::Mat &rgb, cv::Mat &depth, vector<ObjInfo*> &vinfos,bool isUseCanny=true);
 
     static void generatePersonMask(cv::Mat &personMask,  vector<ObjInfo*> &vinfos);
 
@@ -165,7 +172,7 @@ public:
 private:
     static void loadObjinfo(std::string infopath,cv::Mat object_mask, cv::Mat rgb,cv::Mat depth, vector<ObjInfo*> &vinfos);
     static void loadObjinfoWithEdge(std::string infopath,cv::Mat object_mask, cv::Mat rgb,cv::Mat depth,cv::Mat edgeimg, vector<ObjInfo*> &vinfos);
-    static cv::Rect expandROI(cv::Rect ROI,cv::Size imgsz, int &offestX,int &offestY,int &offestW,int &offestH,float scale=0.0){
+    static cv::Rect expandROI(cv::Rect ROI,cv::Size imgsz, int &offestX,int &offestY,int &offestW,int &offestH,float scale=0.15){
         assert(scale<1.0&&scale>=0);
         int meanside=((ROI.width+ROI.height)/2)*scale;
         cv::Rect expandR;
@@ -302,48 +309,6 @@ void ReadFile::LoadTrack(const string &strTrackFilename, FrameTrackIDMap &vstrTr
     fAssociation.close();
 }
 
-void ReadFile::loadObjinfo(string infopath, cv::Mat object_mask, cv::Mat rgb, cv::Mat depth, vector<ObjInfo *> &vinfos)
-{
-    YAML::Node objinfo = YAML::LoadFile(infopath);
-    std::vector<std::vector<int>> boxes = objinfo["boxes"].as<std::vector<std::vector<int>>>();
-    std::vector<int> classes = objinfo["classes"].as<std::vector<int>>();
-    std::vector<float> scores = objinfo["scores"].as<std::vector<float>>();
-    int maskheight = 0;
-    for (size_t num = 0; num < scores.size(); num++)
-    {
-        std::vector<int> box = boxes.at(num);
-        ObjInfo* info = new ObjInfo(cv::Rect(box.at(0), box.at(1), box.at(2), box.at(3)), scores.at(num), classes.at(num));
-        cv::Rect rect;
-        if (maskheight == 0)
-        {
-            rect = cv::Rect(0, maskheight, info->ojbROI.width, info->ojbROI.height);
-        }
-        else
-        {
-            if (maskheight + info->ojbROI.height >= object_mask.size().height)
-            {
-
-                rect = cv::Rect(0, maskheight, info->ojbROI.width, object_mask.size().height - maskheight );
-                info->ojbROI.height=info->ojbROI.height!=rect.height?rect.height:rect.height;
-            }
-            else {
-                rect = cv::Rect(0, maskheight, info->ojbROI.width, info->ojbROI.height);
-            }
-        }
-
-        info->objMat = object_mask(rect).clone();
-//        if(info->objClass==0)
-//        {
-//            cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(25, 25));
-//            cv::dilate(info->objMat,info->objMat,element);
-//        }
-        info->Rectrgb = rgb(info->ojbROI).clone();
-        info->Rectdepth = depth(info->ojbROI).clone();
-        maskheight += (info->ojbROI.height + 1);
-        vinfos.push_back(info);
-    }
-}
-
 pcl::PointCloud<pcl::PointXYZRGBA>::Ptr ReadFile::generatePointCloudInRect(cv::Mat edge, cv::Mat rgb, cv::Mat depth, cv::Rect rect)
 {
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr objrgbaEdge(new pcl::PointCloud<pcl::PointXYZRGBA>);
@@ -428,12 +393,72 @@ void ReadFile::loadObjinfoWithEdge(string infopath, cv::Mat object_mask, cv::Mat
 
         info->objrgbaCloud=generatePointCloudInRect(expandObjedge,rgb(info->expandROI),depth(info->expandROI),info->expandROI);
         info->objCloud=generateMaskPointCloud(depth(info->ojbROI),rgb(info->ojbROI),info->objMat,info->ojbROI);
-        maskheight += (info->ojbROI.height + 1);
+        maskheight += (info->ojbROI.height );
         vinfos.push_back(info);
     }
 }
 
-void ReadFile::imgread(string objpath, std::string Filename, std::string depthpath,  cv::Mat &mask, cv::Mat &object_mask, cv::Mat &rgb, cv::Mat &depth, vector<ObjInfo*> &vinfos) {
+void ReadFile::loadObjinfo(string infopath, cv::Mat object_mask, cv::Mat rgb, cv::Mat depth, vector<ObjInfo *> &vinfos)
+{
+    YAML::Node objinfo = YAML::LoadFile(infopath);
+    std::vector<std::vector<int>> boxes = objinfo["boxes"].as<std::vector<std::vector<int>>>();
+    std::vector<int> classes = objinfo["classes"].as<std::vector<int>>();
+    std::vector<float> scores = objinfo["scores"].as<std::vector<float>>();
+    int maskheight = 0;
+    for (size_t num = 0; num < scores.size(); num++)
+    {
+        std::vector<int> box = boxes.at(num);
+        ObjInfo* info = new ObjInfo(cv::Rect(box.at(0), box.at(1), box.at(2), box.at(3)), scores.at(num), classes.at(num));
+        cv::Rect rect;
+        if (maskheight == 0)
+        {
+            rect = cv::Rect(0, maskheight, info->ojbROI.width, info->ojbROI.height);
+        }
+        else
+        {
+            if (maskheight + info->ojbROI.height >= object_mask.size().height)
+            {
+
+                rect = cv::Rect(0, maskheight, info->ojbROI.width, object_mask.size().height - maskheight );
+                info->ojbROI.height=info->ojbROI.height!=rect.height?rect.height:rect.height;
+            }
+            else {
+                rect = cv::Rect(0, maskheight, info->ojbROI.width, info->ojbROI.height);
+            }
+        }
+
+        info->objMat = object_mask(rect).clone();
+//        if(info->objClass==0)
+//        {
+//            cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(25, 25));
+//            cv::dilate(info->objMat,info->objMat,element);
+//        }
+        int ofx,ofy,ofw,ofh;
+        info->expandROI=expandROI(info->ojbROI,rgb.size(),ofx,ofy,ofw,ofh);
+        info->Rectrgb = rgb(info->ojbROI).clone();
+        info->Rectdepth = depth(info->ojbROI).clone();
+        info->objedge=cv::Mat::zeros(info->objMat.size(),CV_8U);
+        cv::Mat expandObjedge=cv::Mat::zeros(info->expandROI.size(),CV_8U);
+        info->objedge.copyTo(expandObjedge(cv::Rect(ofx,ofy,info->ojbROI.width,info->ojbROI.height)));
+
+//        cv::Mat tempma,tempma1;
+//        cv::cvtColor(expandObjedge,tempma,cv::COLOR_GRAY2BGR);
+//        cv::cvtColor(info->objedge,tempma1,cv::COLOR_GRAY2BGR);
+//        tempma.copyTo(rgb(info->expandROI));
+//        tempma1.copyTo(rgb(info->ojbROI));
+//        cv::imshow("testexpand",rgb);
+//        cv::imwrite("tempma.jpg",rgb);
+//        cv::imshow("testexpand1",info->objedge);
+//        cv::waitKey(0);
+
+        info->objrgbaCloud=generatePointCloudInRect(expandObjedge,rgb(info->expandROI),depth(info->expandROI),info->expandROI);
+        info->objCloud=generateMaskPointCloud(depth(info->ojbROI),rgb(info->ojbROI),info->objMat,info->ojbROI);
+        maskheight += (info->ojbROI.height);
+        vinfos.push_back(info);
+    }
+}
+
+void ReadFile::imgread(string objpath, std::string Filename, std::string depthpath,  cv::Mat &mask, cv::Mat &object_mask, cv::Mat &rgb, cv::Mat &depth, vector<ObjInfo*> &vinfos,bool isUseCanny) {
     std::string path = objpath+"/object-mask/" + Filename + ".png";
     object_mask = cv::imread(path, cv::IMREAD_UNCHANGED);//读取实例对象图像
     path =  objpath+"/rgb/" + Filename + ".png";
@@ -444,12 +469,17 @@ void ReadFile::imgread(string objpath, std::string Filename, std::string depthpa
     depth /= camera_scale;//转换深度图像比例
     path = objpath+"/yaml/" + Filename + ".yml";//读取配置文件
     if(!object_mask.empty()){
-        cv::Mat cn, gray;
-        cv::cvtColor(rgb, gray, cv::COLOR_BGR2GRAY);
-        cv::Canny(gray, cn, 50, 180);
-        cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5));
-        cv::dilate(cn, cn, element);
-        loadObjinfoWithEdge(path, object_mask,rgb,depth,cn,vinfos);
+        if(isUseCanny)
+        {
+            cv::Mat cn, gray;
+            cv::cvtColor(rgb, gray, cv::COLOR_BGR2GRAY);
+            cv::Canny(gray, cn, 50, 180);
+            cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5));
+            cv::dilate(cn, cn, element);
+            loadObjinfoWithEdge(path, object_mask,rgb,depth,cn,vinfos);
+        }else{
+            loadObjinfo(path, object_mask,rgb,depth,vinfos);
+        }
     }
 }
 
