@@ -12,6 +12,9 @@
     LCCP分割结果图 ：
 ![ZVWiJitcQp](https://user-images.githubusercontent.com/51278459/219844418-508c382b-cc2e-4356-a837-24c292d0b58b.png "LCCP分割结果图")
 
+    LCCP with apply k分割结果图 ：
+![vQCYvx2Wmy](https://user-images.githubusercontent.com/51278459/222373984-f68d10ec-617d-44aa-8774-8deeb5f91068.png "LCCP with apply k分割结果图")
+    
     原始分割结果图：
 ![CloudCompare_XShUvUT8KK](https://user-images.githubusercontent.com/51278459/219712022-b9059be3-0e34-4766-8d82-43a8bffe3cbe.png "原始分割结果图")
 
