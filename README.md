@@ -5,7 +5,6 @@
     分割结果对比动图：
 ![SegmentMap项目演示 00_00_00-00_00_30](https://user-images.githubusercontent.com/51278459/219853704-37019f53-a3d0-427b-9f5e-29ecdfa8571a.gif "分割结果对比视频")
 
-
     Ours分割结果图：
 ![VmjjUG80PE](https://user-images.githubusercontent.com/51278459/219712001-74d56ce4-d69e-4c99-97ee-c86031abf2ee.png "Ours分割结果图")
 
