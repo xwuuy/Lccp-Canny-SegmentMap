@@ -47,5 +47,3 @@ TUM数据集 rgbd_dataset_freiburg1_room序列
 执行命令  
 
     "SegmentMap.exe --Dataset" 数据集目录 -t 数据集目录/KeyFrameTrajectory.txt -c 0.2 -s 0.4 -n 0.6 -C 15 -S 0.01"
-此外
-    将参数-S(平滑度检测)置为0时可以提高4倍分割速度，并且不会有精度损失（目前暂未发现原因，平滑度检测中使用的运算，主要为向量计算，正常应该不会消耗大量计算量）
