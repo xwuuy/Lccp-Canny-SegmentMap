@@ -26,8 +26,8 @@
 
 ### 测试数据集
 TUM数据集 rgbd_dataset_freiburg1_room序列  
-百度网盘 链接：https://pan.baidu.com/s/1mh8ELvMx0nrTP37GEwXyNA  
-提取码：in26
+百度网盘 链接：https://pan.baidu.com/s/1sMxa3skD_Uix4TYjzioLyQ 
+提取码：1wpe
 
 ### 使用方法：
 编译文件
