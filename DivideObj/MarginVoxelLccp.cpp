@@ -109,6 +109,7 @@ uint ORBSLAM2::MarginVoxelLccp::BFS( uint32_t seed, boost::unordered_map<uint32_
 	while (!stackvoxel.empty()) {
 		uint32_t index = stackvoxel.top();
 		stackvoxel.pop();
+		matchPointCloud.erase(*i);//delete label
         auto neigborit=seg_label_to_neighbor_set_map_.find(index);
         if(neigborit==seg_label_to_neighbor_set_map_.end()){
             continue;
@@ -124,7 +125,7 @@ uint ORBSLAM2::MarginVoxelLccp::BFS( uint32_t seed, boost::unordered_map<uint32_
                     stackvoxel.push(*i);//加入栈
                     voxelnum += tempvnum;//统计当前子图的超体素数量
                 }
-                matchPointCloud.erase(*i);//delete label
+
 			}
 		}
 	}
